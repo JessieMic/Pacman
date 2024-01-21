@@ -1,0 +1,88 @@
+#include "Fruit.h"
+
+void Fruit::moveDumb(Board& b)
+{
+	erase();
+	Point currPos = getPos();
+	char c = b.getChar(currPos.getY(), currPos.getX());
+	if (c == (char)gameObjects::BREADCRUM) //print breadcrum if we hid it
+	{
+		gotoxy(currPos.getX(), currPos.getY());
+
+		if (MovingFigure::usingColor)//color breadcrumb
+			SetConsoleTextAttribute(hConsole, (char)colors::DARK_YELLOW);
+		cout << (char)gameObjects::BREADCRUM;
+	}
+
+	bool legitMove = false;
+	int dir;
+
+
+	if (moveCount % (int)ghost::g_moveC == 0) //random a diracton
+	{
+		dir = rand() % 4;
+		if(moveCount==0)//So the fruit can move when game starts
+			moveCount++;
+	}
+	else //continue moving same dir
+	{
+		dir = -1;
+		moveCount++;
+	}
+
+	while (!legitMove)
+	{
+		Point moveTo = nextMoveOfFigure(dir);
+		c = b.getChar(moveTo.getY(), moveTo.getX());
+		if ((c != (char)gameObjects::SPACE) && (c != (char)gameObjects::BREADCRUM))
+		{
+			dir = rand() % 4;
+		}
+		else
+		{
+			stepNoErase();
+			legitMove = true;
+		}
+	}
+
+}
+
+bool Fruit::deleteOverTime()
+{
+	//cout << "move is " << moveCount << endl;
+	if (moveCount == 25)
+	{
+		return true;
+	}
+	else
+		return false;
+}
+
+void Fruit::spawn(Board& b)
+{
+	bool flag = true;
+	int x, y;
+
+	while (flag)
+	{
+		x = rand() % (int)boardSettings::COL;
+		y = rand() % (int)boardSettings::ROW;
+
+		if (b.getChar(y,x) == (char)gameObjects::SPACE || b.getChar(y,x) == (char)gameObjects::BREADCRUM)
+		{
+			setPos(x, y);
+			flag = false;
+		}
+	}
+}
+
+void Fruit::switchToPrevChar(Board& b)
+{
+	Point currPos = getPos();
+	gotoxy(currPos.getX(),currPos.getY());
+
+	if (MovingFigure::usingColor)//switchs the right color if in color mode
+		SetConsoleTextAttribute(hConsole, (char)colors::DARK_YELLOW);
+
+	cout << b.getChar(currPos.getY(),currPos.getX());
+}
